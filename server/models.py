@@ -1,4 +1,5 @@
-   name = db.Column(db.String)
+class Restaurant(db.Model, SerializerMixin):
+    name = db.Column(db.String)
     address = db.Column(db.String)
 
     # add relationship
@@ -16,7 +17,7 @@
 
     def __repr__(self):
         return f"<Restaurant {self.name}>"
-@@ -35,9 +42,16 @@ class Pizza(db.Model, SerializerMixin):
+class Pizza(db.Model, SerializerMixin):
     name = db.Column(db.String)
     ingredients = db.Column(db.String)
 
@@ -35,7 +36,7 @@
 
     def __repr__(self):
         return f"<Pizza {self.name}, {self.ingredients}>"
-@@ -49,11 +63,25 @@ class RestaurantPizza(db.Model, SerializerMixin):
+class RestaurantPizza(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     price = db.Column(db.Integer, nullable=False)
 
