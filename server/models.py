@@ -1,8 +1,16 @@
-class Restaurant(db.Model, SerializerMixin):
-    name = db.Column(db.String)
-    address = db.Column(db.String)
+from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.orm import validates
+from sqlalchemy_serializer import SerializerMixin
 
-    # add relationship
+# Import db from app
+from app import db
+
+class Restaurant(db.Model, SerializerMixin):
+    __tablename__ = 'restaurants'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    address = db.Column(db.String, nullable=False)
+
     # Relationship mapping the restaurant to related restaurant_pizza
     restaurant_pizzas = db.relationship(
         'RestaurantPizza', back_populates='restaurant', cascade='all, delete-orphan')
@@ -11,22 +19,22 @@ class Restaurant(db.Model, SerializerMixin):
     pizzas = association_proxy('restaurant_pizzas', 'pizza',
                                creator=lambda pizza_obj: RestaurantPizza(pizza=pizza_obj))
 
-    # add serialization rules
     # Serialization rules
     serialize_rules = ('-restaurant_pizzas.restaurant',)
 
     def __repr__(self):
         return f"<Restaurant {self.name}>"
-class Pizza(db.Model, SerializerMixin):
-    name = db.Column(db.String)
-    ingredients = db.Column(db.String)
 
-    # add relationship
+class Pizza(db.Model, SerializerMixin):
+    __tablename__ = 'pizzas'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    ingredients = db.Column(db.String, nullable=False)
+
     # Relationship mapping the pizza to related restaurant_pizza
     restaurant_pizzas = db.relationship(
         'RestaurantPizza', back_populates='pizza', cascade='all, delete-orphan')  
 
-    # add serialization rules
     # Association proxy to get restaurants for this pizza through restaurant_pizzas
     restaurants = association_proxy('restaurant_pizzas', 'restaurant',
                                     creator=lambda restaurant_obj: RestaurantPizza(restaurant=restaurant_obj))
@@ -36,15 +44,12 @@ class Pizza(db.Model, SerializerMixin):
 
     def __repr__(self):
         return f"<Pizza {self.name}, {self.ingredients}>"
+
 class RestaurantPizza(db.Model, SerializerMixin):
+    __tablename__ = 'restaurant_pizzas'
     id = db.Column(db.Integer, primary_key=True)
     price = db.Column(db.Integer, nullable=False)
 
-    # add relationships
-
-    # add serialization rules
-
-    # add validation
     # Foreign key to store the pizza id
     pizza_id = db.Column(db.Integer, db.ForeignKey('pizzas.id'), nullable=False)
     # Foreign key to store the restaurant id
@@ -58,7 +63,7 @@ class RestaurantPizza(db.Model, SerializerMixin):
     # Serialization rules
     serialize_rules = ('-restaurant.restaurant_pizzas', '-pizza.restaurant_pizzas',)
 
-     # Validation for price
+    # Validation for price
     @validates('price')
     def validate_price(self, key, price):
         if not (1 <= price <= 30):

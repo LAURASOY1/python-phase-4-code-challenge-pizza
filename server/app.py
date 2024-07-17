@@ -1,19 +1,22 @@
 #!/usr/bin/env python3
-from models import db, Restaurant, RestaurantPizza, Pizza
-from flask_migrate import Migrate
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import validates
-from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy_serializer import SerializerMixin
+from flask_migrate import Migrate
 from flask_restful import Api, Resource
+from sqlalchemy_serializer import SerializerMixin
 import os
 
 app = Flask(__name__)
+
+# Adjust the database URI to use SQLite
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///your_database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db.init_app(app)
+
+db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 api = Api(app)
+
+from models import Restaurant, RestaurantPizza, Pizza
 
 @app.route("/")
 def index():
